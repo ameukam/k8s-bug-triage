@@ -1,5 +1,10 @@
+service: k8s-bug-triage
+
 provider:
   name: google
   runtime: nodejs
   project: k8s-bug-triage
   credentials: ./keyfile.json
+
+plugins:
+  - serverless-google-cloudfunctions
