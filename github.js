@@ -9,25 +9,32 @@ let client = require('graphql-client')({
     }
 });
 
-const milestoneQuery = `query {
-  repository(owner: "kubernetes", name: "kubernetes") {
-    milestone(number: 39) {
-      pullRequests(states: [OPEN, CLOSED, MERGED], first: 100) {
-        edges {
-          node {
-            number
-            title
-            url
-            createdAt
-            updatedAt
-            merged
-            author{
-              login
-            }
-            labels(first: 50) {
-              edges {
-                node {
-                  name
+const issueQuery = `query { 
+    repository(owner: "kubernetes", name: "kubernetes") {
+      milestone(number: 39) {
+        issues(states: [OPEN, CLOSED], first: 100) {
+          edges {
+            node {
+              number
+              title
+              url
+              assignees(first: 10){
+                edges{
+                  node{
+                    login
+                  }
+                }
+              }
+              createdAt
+              updatedAt            
+              author{
+                login
+              }
+              labels(first: 50) {
+                edges {
+                  node {
+                    name
+                  }
                 }
               }
             }
@@ -35,17 +42,16 @@ const milestoneQuery = `query {
         }
       }
     }
-  }
-}`;
+  }`;
 
 exports.GetData = (callback) => {
     let prArray = [];
-    client.query(milestoneQuery, function(req, res) {
+    client.query(issueQuery, function (req, res) {
         if (res.status === 401) {
             throw new Error('Not authorized');
         }
     })
-        .then(function(body) {
+        .then(function (body) {
             let prs = body.data.repository.milestone.pullRequests.edges;
             prArray = prs.map(parsePullRequest);
             callback(null, prArray);
@@ -65,11 +71,11 @@ function parsePullRequest(pullRequest) {
     let isApproved = extractValue(labelArray, 'approved');
     let sig = extractValue(labelArray, 'sig/');
     let boolLgtm = false;
-    if (isLgtm != null){
+    if (isLgtm != null) {
         boolLgtm = true;
     }
     let boolIsApproved = false;
-    if (isApproved != null){
+    if (isApproved != null) {
         boolIsApproved = true;
     }
 
@@ -81,11 +87,11 @@ function parseLabel(label) {
     return label.node.name;
 }
 
-function extractValue(labelArray, searchVal){
+function extractValue(labelArray, searchVal) {
     let kind = null;
-    labelArray.forEach(function(elt) {
-        if (elt.includes(searchVal)){
-            if (searchVal.includes("/")){
+    labelArray.forEach(function (elt) {
+        if (elt.includes(searchVal)) {
+            if (searchVal.includes("/")) {
                 kind = elt.substring(searchVal.length);
             } else {
                 kind = elt;

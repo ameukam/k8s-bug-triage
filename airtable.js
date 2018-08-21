@@ -1,15 +1,15 @@
 const Airtable = require('airtable');
-const base = new Airtable({apiKey: process.env.AT_TOKEN}).base(process.env.AT_TABLE);
-const PR_TABLE = 'K8s 1.12 Milestone PRs';
+const base = new Airtable({ apiKey: process.env.AT_TOKEN }).base(process.env.AT_TABLE);
+const PR_TABLE = 'K8s 1.12 Milestone Bug Triage';
 
 exports.findRecordByPr = (prNum, callback) => {
     base(PR_TABLE).select({
         maxRecords: 1,
         filterByFormula: `{PR NUMBER} = ${prNum}`,
         view: "Grid view"
-    }).all(function(err, records) {
+    }).all(function (err, records) {
         if (err) { callback(err, null); }
-        if (records.length > 0){
+        if (records.length > 0) {
             callback(null, records[0]._rawJson.fields);
         } else {
             callback(null, null)
@@ -18,10 +18,10 @@ exports.findRecordByPr = (prNum, callback) => {
 };
 
 exports.updateRecordByPr = (record, callback) => {
-    getAtId(record._prNum, function (err, res){
+    getAtId(record._prNum, function (err, res) {
         if (err) { callback(err, null); }
         else {
-            if (res != null){
+            if (res != null) {
                 base(PR_TABLE).update(res, {
                     "PR Number": record._prNum,
                     "PR Name": record._prName,
@@ -35,7 +35,7 @@ exports.updateRecordByPr = (record, callback) => {
                     "Sig": record._responsibleSig,
                     "k/k PR Author": record._author,
                     "Merged": record._isMerged
-                }, function(err, record) {
+                }, function (err, record) {
                     if (err) { console.error(err); return; }
                     console.log(record);
                 });
@@ -58,20 +58,20 @@ exports.addNewRecord = (record, callback) => {
         "Sig": record._responsibleSig,
         "k/k PR Author": record._author,
         "Merged": record._isMerged
-    }, function(err, record) {
+    }, function (err, record) {
         if (err) { callback(err, null); }
         callback(null, record);
     });
 };
 
-function getAtId(prNum, callback){
+function getAtId(prNum, callback) {
     base(PR_TABLE).select({
         maxRecords: 1,
         filterByFormula: `{PR NUMBER} = ${prNum}`,
         view: "Grid view"
-    }).all(function(err, records) {
+    }).all(function (err, records) {
         if (err) { callback(err, null); }
-        if (records.length > 0){
+        if (records.length > 0) {
             callback(null, records[0].id);
         } else {
             callback(null, null)
