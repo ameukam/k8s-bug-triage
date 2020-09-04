@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "airtable": "^0.5.6",
+    "airtable": "^0.7.2",
     "graphql-client": "^2.0.1",
     "serverless": "^1.28.0"
   },
